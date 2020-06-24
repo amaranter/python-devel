@@ -30,8 +30,8 @@ RUN sudo su && \
     sudo ACCEPT_EULA=Y apt-get install mssql-tools && \
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile && \ 
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
-    source ~/.bashrc && \
-    sudo apt-get install unixodbc-dev -y
+    source ~/.bashrc
+    
 
 
 # Install development dependencies
@@ -63,6 +63,9 @@ RUN wget https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz  && \
 # Install pip
 RUN sudo apt install python3-pip -y
 
+# Install unixodbc-dev
+RUN apt-get install unixodbc-dev -y
+
 
 # Create Python some useful symlinks that are expected to exist
 RUN cd /usr/local/bin && \
@@ -75,4 +78,6 @@ RUN cd /usr/local/bin && \
 
 # Install Poetry packing and dependency manager
 RUN pip install "poetry==$POETRY_VERSION"
+
+
 

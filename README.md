@@ -8,7 +8,7 @@
 
 #### Create a `Dockerfile` in your Python app project
 ```Dockerfile
-FROM ronnyamarante/python-devel:1.0.0
+FROM ronnyamarante/python-devel:1.0.1
 
 WORKDIR /usr/src/app
 
