@@ -11,28 +11,14 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1 \
     POETRY_VERSION=1.0.8
 
+SHELL ["/bin/bash", "-c"]
+
 
 # Install basic dependencies
 RUN apt-get update && \
-    apt-get install sudo curl -y 
-
-
-SHELL ["/bin/bash", "-c"]
-
-# Install msodbc
-# Reference: https://docs.microsoft.com/pt-br/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server
-RUN sudo su && \
-    curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
-    exit && \
-    sudo apt-get install apt-transport-https && \
-    sudo apt-get update && \
-    sudo ACCEPT_EULA=Y apt-get install msodbcsql17 && \
-    sudo ACCEPT_EULA=Y apt-get install mssql-tools && \
-    echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile && \ 
-    echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
-    source ~/.bashrc
-    
-
+    apt-get install sudo \
+    curl \
+    apt-utils -y 
 
 # Install development dependencies
 RUN apt-get install build-essential \
@@ -45,6 +31,7 @@ RUN apt-get install build-essential \
     libffi-dev \
     libsqlite3-dev \
     wget \
+    gnupg2 \
     libbz2-dev -y 
 
 
@@ -63,10 +50,6 @@ RUN wget https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz  && \
 # Install pip
 RUN sudo apt install python3-pip -y
 
-# Install unixodbc-dev
-RUN apt-get install unixodbc-dev -y
-
-
 # Create Python some useful symlinks that are expected to exist
 RUN cd /usr/local/bin && \
 	  ln -s idle3 idle && \
@@ -77,7 +60,24 @@ RUN cd /usr/local/bin && \
 
 
 # Install Poetry packing and dependency manager
-RUN pip install "poetry==$POETRY_VERSION"
+RUN pip install "poetry==$POETRY_VERSION" && \
+    poetry config virtualenvs.create false
 
 
+# Install msodbc
+# Reference: https://docs.microsoft.com/pt-br/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server
+RUN sudo curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    sudo curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    sudo apt-get install apt-transport-https -y && \
+    sudo apt-get update && \
+    sudo ACCEPT_EULA=Y apt-get install msodbcsql17 -y && \
+    sudo ACCEPT_EULA=Y apt-get install mssql-tools -y && \
+    echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile && \ 
+    echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
+    source ~/.bashrc
 
+# Install unixodbc-dev
+RUN apt-get install unixodbc-dev -y
+
+
+CMD ["/bin/bash"]
